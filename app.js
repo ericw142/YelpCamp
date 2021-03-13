@@ -41,10 +41,14 @@ app.get('/campgrounds/new', (req, res) => {
     res.render('campgrounds/new');
 })
 // Creating new campground
-app.post('/campgrounds', async (req, res) => {
+app.post('/campgrounds', async (req, res, next) => {
+    try{
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`)
+    } catch(e){
+        next(e);
+    }
 })
 // Finding specific campground
 app.get('/campgrounds/:id', async (req, res) => {
@@ -67,6 +71,11 @@ app.delete('/campgrounds/:id', async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
+})
+
+// Error Handler
+app.use((err, req, res, next) => {
+    res.send('Something went wrong!');
 })
 
 // Start Server
