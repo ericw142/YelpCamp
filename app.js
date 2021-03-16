@@ -8,6 +8,7 @@ const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 const Campground = require("./models/campground");
+const Review = require("./models/review");
 
 // Database
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
@@ -80,6 +81,15 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
+}))
+// Creating new review
+app.post('/campgrounds/:id/reviews', catchAsync(async(req, res) => {
+    const campground = await Campground.findById(req.params.id);
+    const review = new Review(req.body.review);
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
 }))
 // 404
 app.all('*', (req, res, next) => {
